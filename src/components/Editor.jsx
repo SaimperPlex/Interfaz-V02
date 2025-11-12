@@ -819,99 +819,100 @@ export default function Editor() {
                     </>
                   )}
 
- {/* Texto - Dropdown flotante visible siempre ARRIBA */}
+{/* ---------- TEXTO: controles (SOLO aparece si activeTab === 'texto') ---------- */}
 {activeTab === 'texto' && (
-  <div className="flex items-center gap-2 relative">
-    {/* Botón de selección de fuente */}
-    <button 
-      onClick={() => setShowFontDropdown(!showFontDropdown)} 
-      className={`${t.bgTertiary} ${t.border} border-2 rounded-2xl px-3 py-2 ${t.text} text-sm flex items-center gap-2 whitespace-nowrap`}
-    >
-      <span style={getFontStyle(selectedFont)}>{selectedFont}</span>
-      <ChevronDown className={`w-4 h-4 transition-transform ${showFontDropdown ? 'rotate-180' : ''}`} />
-    </button>
-
-    {/* Dropdown flotante (aparece más arriba) */}
-    {showFontDropdown && (
-      <div
-        className={`fixed ${t.bgSecondary} ${t.border} border-2 rounded-2xl shadow-2xl overflow-hidden z-[99999] min-w-[220px] max-w-[280px] max-h-[300px] overflow-y-auto backdrop-blur-xl`}
-        style={{
-          top: 'calc(70px - 180px)', // subido más arriba (ajusta si quieres)
-          left: '20px',
-          transform: 'translateY(-20px)', // espacio adicional para clic
-        }}
+  <div className="flex items-center gap-3 relative z-[200]">
+    {/* --- Botón de selección de fuente --- */}
+    <div className="relative">
+      <button
+        onClick={() => setShowFontDropdown(prev => !prev)}
+        className={`${t.bgTertiary} ${t.border} border-2 rounded-2xl px-3 py-2 ${t.text} text-sm flex items-center gap-2 whitespace-nowrap`}
+        type="button"
       >
-        {eventConfig.availableFonts && eventConfig.availableFonts.length > 0 ? (
-          eventConfig.availableFonts.map(font => (
-            <button
-              key={font.name}
-              onClick={() => {
-                setSelectedFont(font.name);
-                setShowFontDropdown(false);
-              }}
-              className={`w-full px-4 py-3 text-left ${t.hover} ${t.text} transition-colors ${
-                selectedFont === font.name ? 'bg-blue-500/20' : ''
-              }`}
-              style={{ fontFamily: font.family }}
-            >
-              {font.name}
-            </button>
-          ))
-        ) : (
-          <div className={`px-4 py-3 ${t.textMuted} text-sm`}>
-            No hay fuentes disponibles
-          </div>
-        )}
-      </div>
-    )}
+        <span style={getFontStyle(selectedFont)}>{selectedFont}</span>
+        <ChevronDown className={`w-4 h-4 transition-transform ${showFontDropdown ? 'rotate-180' : ''}`} />
+      </button>
+
+      {/* Dropdown flotante (fixed para que no quede recortado) */}
+      {showFontDropdown && (
+        <div
+          className={`fixed ${t.bgSecondary} ${t.border} border-2 rounded-2xl shadow-2xl overflow-hidden z-[99999] min-w-[220px] max-w-[280px] max-h-[300px] overflow-y-auto backdrop-blur-xl`}
+          style={{
+            /* Ajusta top/left para colocarlo donde quieras; aquí está arriba/izquierda fija */
+            top: '20vh',
+            left: '50%',
+            transform: 'translateX(-50%) translateY(-10px)',
+          }}
+        >
+          {eventConfig.availableFonts && eventConfig.availableFonts.length > 0 ? (
+            eventConfig.availableFonts.map(font => (
+              <button
+                key={font.name}
+                onClick={() => {
+                  setSelectedFont(font.name);
+                  setShowFontDropdown(false);
+                }}
+                className={`w-full px-4 py-3 text-left ${t.hover} ${t.text} transition-colors ${selectedFont === font.name ? 'bg-blue-500/20' : ''}`}
+                style={{ fontFamily: font.family }}
+                type="button"
+              >
+                {font.name}
+              </button>
+            ))
+          ) : (
+            <div className={`px-4 py-3 ${t.textMuted} text-sm`}>No hay fuentes disponibles</div>
+          )}
+        </div>
+      )}
+    </div>
+
+    {/* --- Paleta de colores --- */}
+    <div className="flex items-center gap-1.5 bg-black/20 rounded-2xl p-1.5">
+      {eventConfig.availableColors && eventConfig.availableColors.length > 0 ? (
+        eventConfig.availableColors.map((color, index) => (
+          <button
+            key={index}
+            onClick={() => setSelectedColor(color)}
+            className={`w-8 h-8 rounded-xl transition-all hover:scale-110 ${selectedColor === color ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-zinc-900 scale-110' : ''}`}
+            style={{ backgroundColor: color }}
+            title={color}
+            type="button"
+          />
+        ))
+      ) : (
+        <input
+          type="color"
+          value={selectedColor}
+          onChange={(e) => setSelectedColor(e.target.value)}
+          className="w-8 h-8 rounded-2xl p-0 cursor-pointer"
+        />
+      )}
+    </div>
+
+    {/* --- Input de texto y botón añadir --- */}
+    <input
+      type="text"
+      value={textInput}
+      onChange={(e) => setTextInput(e.target.value)}
+      onKeyPress={(e) => e.key === 'Enter' && addTextElement()}
+      placeholder="Escribe..."
+      className={`min-w-[160px] ${t.bgTertiary} ${t.border} border-2 rounded-2xl px-3 py-2 ${t.text} text-sm`}
+    />
+    <button
+      onClick={addTextElement}
+      disabled={!textInput.trim()}
+      className="w-8 h-8 bg-blue-500 rounded-xl text-white flex items-center justify-center disabled:opacity-50 hover:bg-blue-600 transition-all active:scale-90"
+      type="button"
+    >
+      +
+    </button>
   </div>
 )}
-
-
-      {/* Paleta de colores disponibles */}
-      <div className="flex items-center gap-1.5 bg-black/20 rounded-2xl p-1.5">
-        {eventConfig.availableColors && eventConfig.availableColors.length > 0 ? (
-          eventConfig.availableColors.map((color, index) => (
-            <button
-              key={index}
-              onClick={() => setSelectedColor(color)}
-              className={`w-8 h-8 rounded-xl transition-all hover:scale-110 ${
-                selectedColor === color ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-zinc-900 scale-110' : ''
-              }`}
-              style={{ backgroundColor: color }}
-              title={color}
-            />
-          ))
-        ) : (
-          <input 
-            type="color" 
-            value={selectedColor} 
-            onChange={(e) => setSelectedColor(e.target.value)} 
-            className="w-8 h-8 rounded-2xl p-0 cursor-pointer" 
-          />
-        )}
-      </div>
-
-  <input
-    type="text"
-    value={textInput}
-    onChange={(e) => setTextInput(e.target.value)}
-    onKeyPress={(e) => e.key === 'Enter' && addTextElement()}
-    placeholder="Escribe..."
-    className={`min-w-[160px] ${t.bgTertiary} ${t.border} border-2 rounded-2xl px-3 py-2 ${t.text} text-sm`}
-  />
-  <button
-    onClick={addTextElement}
-    disabled={!textInput.trim()}
-    className="w-8 h-8 bg-blue-500 rounded-xl text-white flex items-center justify-center disabled:opacity-50 hover:bg-blue-600 transition-all active:scale-90"
-  >
-    +
-  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    )}
+        )}
       </div>
 
       {/* GRUPO 1 - Dock inferior (Paneles) centrado */}
